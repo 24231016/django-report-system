@@ -1,0 +1,45 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet" id="bootstrap-css">
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/jquery.min.js" %}"></script>
+    <!------ Include the above in your HEAD tag ---------->   
+    
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>登入</title>
+    <!-- All the files that are required -->
+    <link rel="stylesheet" href="{% static "css/123.css" %}">
+</head>
+{% block content %}
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+      
+      <div class="fadeIn first">
+        <img src="{% static "images/123.jpg" %}" id="icon" alt="User Icon" />
+      </div>
+      {% for message in messages %}
+          <div class='alert alert-warning'>{{ message }}</div>
+      {% endfor %}
+      <!-- show wrong message -->
+      <!-- Login Form -->
+      <form action="" method="POST">
+        {% csrf_token %}
+        {{ login_form.as_table }}
+          
+        <input type="submit" class="fadeIn fourth" value="登入">
+      </form>
+  
+      <!-- Remind Passowrd -->
+      <div id="formFooter">
+        <a class="underlineHover" href="/register">註冊</a>
+      </div>
+  
+    </div>
+</div>
+{% endblock %}
+
+

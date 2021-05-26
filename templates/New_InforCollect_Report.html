@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}新增滲透報告{% endblock %}
+{% block content %}
+
+<div class="tg-wrap">
+    {% for message in messages %}
+          <div class='alert alert-warning'>{{ message }}</div>
+    {% endfor %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <table class="tg">
+            <thead >
+                <tr >
+                    <th class="t123" colspan="4" >
+                    執行日期：{{ new_ic_report.excute_date }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tg-rgp7" colspan="2">目標</td>
+                    <td class="tg-rgp7" colspan="2">偵蒐人員</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">目標名稱</td>
+                    <td class="tg-rgp7">{{ new_ic_report.target_name }}</td>
+                    <td class="tg-rgp7">地點</td>
+                    <td class="tg-rgp7">{{ new_ic_report.target_location }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7" rowspan="2">網址</td>
+                    <td class="tg-rgp7" rowspan="2">{{ new_ic_report.target_url }}</td>
+                    <td class="tg-rgp7">時間</td>
+                    <td class="tg-rgp7">{{ new_ic_report.search_time }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7" rowspan="3">IP位置</td>
+                    <td class="tg-rgp7" rowspan="3">{{ new_ic_report.vpn_ip }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">IP/內部IP</td>
+                    <td class="tg-rgp7">{{ new_ic_report.target_ip }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">所屬戰區</td>
+                    <td class="tg-rgp7">{{ new_ic_report.target_warzone }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">服務埠</td>
+                    <td class="tg-rgp7">{{ new_ic_report.target_port }}</td>
+                    <td class="tg-rgp7">執行人員</td>
+                    <td class="tg-rgp7">{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">弱點名稱</td>
+                    <td class="tg-rgp7">{{ new_ic_report.weakness }}</td>
+                    <td class="tg-rgp7">簽證</td>
+                    <td class="tg-rgp7"></td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">步驟</td>
+                    <td class="tg-rgp7" colspan="2">擷圖說明</td>
+                    <td class="tg-rgp7">步驟分析</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">{{ new_ic_report.topic }}</td>
+                    <td class="tg-rgp7" colspan="2"></td>
+                    <td class="tg-rgp7">{{ new_ic_report.content }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">後續作為</td>
+                    <td class="tg-rgp7" colspan="3">{{ new_ic_report.follow_up }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </br>
+    <input class="btn btn-secondary btn-lg btn-block" type="submit" value="送出" />
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet" id="bootstrap-css">
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/jquery.min.js" %}"></script>
+    <!------ Include the above in your HEAD tag ---------->   
+    
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>註冊</title>
+    <!-- All the files that are required -->
+    <link rel="stylesheet" href="{% static "css/123.css" %}">
+</head>
+{% block content %}
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+
+      <div class="fadeIn first">
+        <img src="{% static "images/123.jpg" %}" id="icon" alt="User Icon" />
+      </div>
+      {% for message in messages %}
+          <div class='alert alert-warning'>{{ message }}</div>
+      {% endfor %}
+      <!-- show wrong message -->
+
+      <!-- Register Form -->
+      <form action="" method="POST">
+        {% csrf_token %}
+        {{ register_form.username }}
+        {{ register_form.password1 }}
+        {{ register_form.password2 }}
+        {{ register_form.rank }}
+        {{ register_form.name }}
+        <input type="submit" class="fadeIn fourth" value="註冊">
+      </form>
+  
+      <!-- Remind Passowrd -->
+      <div id="formFooter">
+        <a class="underlineHover" href="/login">已有帳號?按這登入</a>
+      </div>
+  
+    </div>
+</div>
+{% endblock %}

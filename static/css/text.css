@@ -1,0 +1,124 @@
+.userinfo{
+    color:#000000;
+    font-family:"標楷體", Gadget, sans-serif !important;;
+    font-size:20px;
+}
+
+.tg  {
+    border-collapse:collapse;
+    border-spacing:0;
+    width: 100%;
+}
+
+.tg td{
+    border-color:black;
+    border-style:solid;
+    border-width:1px;
+    font-family:Arial, sans-serif;
+    font-size:20px;
+    overflow:hidden;
+    padding:5px 5px;
+    word-break:normal;
+}
+
+.tg th{
+    border-color:black;
+    border-style:solid;
+    border-width:1px;
+    font-family:Arial, sans-serif;
+    font-size:20px;
+    font-weight:normal;
+    overflow:hidden;
+    padding:5px 5px;
+    word-break:normal;
+}
+
+.tg .tg-rgp7{
+    background-color: #ffffffc2;
+    color:#000000;
+    font-family:"標楷體", Gadget, sans-serif !important;;
+    font-size:20px;
+    text-align:center;
+    vertical-align:middle
+}
+
+.tg .tg-rgp6{
+    background-color: #ffffffc2;
+    color:#000000;
+    font-family:"標楷體", Gadget, sans-serif !important;;
+    font-size:20px
+}
+
+.tg .t123{
+    background-color: #ffffffc2;
+    color:#000000;
+    font-family:"標楷體", Gadget, sans-serif !important;;
+    font-size:20px;
+    text-align:right;
+    vertical-align:top
+}
+
+.add_more{
+    color: white !important;
+    background-color: #09054db0 !important;
+    border-radius: 15px !important;
+    border: 0 !important;
+
+}
+.remove_more{
+    color: white !important;
+    background-color: #f5023f !important;
+    border-radius: 15px !important;
+    border: 0 !important;
+    display: none;
+}
+
+.Preview_box {
+	/*预览图片的宽高，不设置会重叠*/
+	width: 200px;
+	height: 200px;
+	/*inline-block图片会横着排列,block会竖着排列*/
+	display: inline-block;
+}
+
+.Preview_box>img {
+	/*图片的宽高，要和div的宽高相同*/
+	width: 200px;
+	height: 200px;
+	/*设置这个属性是为了能让文字显示在图片上方*/
+	position: absolute;
+	z-index: 10;
+}
+
+.Preview_box>a {
+	/*删除标签默认不显示*/
+	display: none;
+	text-align: center;
+	width: 200px;
+	height: 50px;
+	position: absolute;
+	/*margin-top+height=div的高度*/
+	margin-top: 150px;
+	z-index: 11;
+	background-color: rgb(246, 169, 169);
+	/*line-height=height可以使单行文字垂直居中*/
+	line-height: 50px;
+	color: white;
+}
+
+.Preview_box:hover .DelTag {
+	display: inline-block;
+}
+
+@media screen and (max-width: 767px) {
+    .tg {
+        width: auto !important;
+    }
+    .tg col {
+        width: auto !important;
+    }
+    .tg-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
