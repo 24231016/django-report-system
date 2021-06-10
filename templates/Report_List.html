@@ -11,7 +11,7 @@
                 <th>狀態</th>
                 {% if validation or user.enabled %}
                 <th></th>
-                {% endif %}
+                {% endif %}                
             </tr>
         </thead>
         <tbody>
@@ -21,18 +21,32 @@
                     <td>{{ post.user }}</td>
                     <td>{{ post.upload_date }}</td>
                     <td>{{ post.status }}</td>
+                    
                     {% if validation or user.enabled %}
                     <td>
-                    {% if validation %}
-                        <a href="/Report_Post/{{judge}}/modify/{{post.id}}" class="btn btn-info">修改</a>
-                        <a href="/Delete_Post/{{judge}}/{{slug}}/{{post.id}}" onclick="return confirm('確定刪除？！！！');" class="btn btn-danger">刪除</a>
-                    {% endif %}
-                    {% if user.enabled %}
-                        <a href="/Judge_Post/{{judge}}/{{slug}}/success/{{post.id}}" onclick="return confirm('確定審核？！！！');" class="btn btn-success">審核</a>
-                        <a href="/Judge_Post/{{judge}}/{{slug}}/return/{{post.id}}" onclick="return confirm('確定退回？！！！');" class="btn btn-dark">退回</a>
-                    {% endif %}
+                        {% if validation %}
+                            <a href="/Report_Post/{{judge}}/modify/{{post.id}}" class="btn btn-info">修改</a>
+                            <a href="/Delete_Post/{{judge}}/{{slug}}/{{post.id}}" onclick="return confirm('確定刪除？！！！');" class="btn btn-danger">刪除</a>
+                        {% endif %}
+                    
+                        {% if user.enabled %}
+                            {% if post.status == "待審核" %}
+                                <a href="/Judge_Post/{{judge}}/{{slug}}/success/{{post.id}}" onclick="return confirm('確定審核？！！！');" class="btn btn-success">審核</a>
+                            {% endif %}
+                            {% if post.status == "已審核" %}
+                                <a href="/Judge_Post/{{judge}}/{{slug}}/return/{{post.id}}" onclick="return confirm('確定退回？！！！');" class="btn btn-dark">退回</a>
+                                <a href="/WORD/{{judge}}/{{post.id}}" class="btn btn-outline-primary">WORD</a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    {% else %}
+                    <td>
+                        {% if post.status == "已審核" %}
+                            <a href="/WORD/{{judge}}/{{post.id}}" class="btn btn-outline-primary">WORD</a>
+                        {% endif %}
                     </td>
                     {% endif %}
+                    
                 </tr>
             {% endfor %}
         </tbody>

@@ -52,119 +52,124 @@ class NewExploitReport(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '2', 'autofocus': 'autofocus'})
     )
     target_url = forms.CharField(
+        required = False,
         max_length=1000,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '5'})
     )
     target_ip = forms.CharField(
+        required = False,
         max_length=50,
-        widget=forms.TextInput(attrs={'class': 'form-control', })
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     target_port = forms.CharField(
+        required = False,
         max_length=10,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     target_version = forms.CharField(
+        required = False,
         max_length=50,
-        widget=forms.TextInput(attrs={'class': 'form-control', })
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     weakness = forms.CharField(
+        required = False,
         max_length=20,
         widget=forms.TextInput(attrs={'class': 'form-control', })
     )
     search_time = forms.DateField(widget=DateInput)
     source = forms.CharField(
+        required = False,
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     IC_type = forms.CharField(
+        required = False,
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     excute_location = forms.CharField(
+        required = False,
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     vpn_ip = forms.CharField(
+        required = False,
         max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '2'})
     )
-    # topic = forms.CharField(
-    #     max_length=50,
-    #     widget=forms.TextInput(attrs={'class': 'form-control'})
-    # )
-    # content = forms.CharField(
-    #     max_length=1000,
-    #     widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '5'})
-    # )
-    # image = forms.ImageField()
     use = forms.CharField(
+        required = False,
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     admin = forms.CharField(
+        required = False,
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     people = forms.CharField(
+        required = False,
         max_length=50,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     expected = forms.CharField(
+        required = False,
         max_length=1000,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     follow_up = forms.CharField(
-        max_length=1000,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-
-class NewInforCollectReport(forms.Form):
-    excute_date = forms.DateField(widget=DateInput)
-
-    target_name = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': 'autofocus'})
-    )
-    target_url = forms.CharField(
-        max_length=1000,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '2'})
-    )
-    target_ip = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    target_port = forms.CharField(
-        max_length=10,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    target_location = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    target_warzone = forms.CharField(
-        max_length=10,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    weakness = forms.CharField(
-        max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    search_time = forms.DateField(widget=DateInput)
-
-    vpn_ip = forms.CharField(
-        max_length=20,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '4'})
-    )
-    topic = forms.CharField(
-        max_length=50,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '5'})
-    )
-    content = forms.CharField(
+        required = False,
         max_length=1000,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '5'})
     )
-    # image = forms.ImageField()
-    follow_up = forms.CharField(
-        max_length=1000,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+
+# class NewInforCollectReport(forms.Form):
+#     excute_date = forms.DateField(widget=DateInput)
+
+#     target_name = forms.CharField(
+#         max_length=50,
+#         widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': 'autofocus'})
+#     )
+#     target_url = forms.CharField(
+#         max_length=1000,
+#         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '2'})
+#     )
+#     target_ip = forms.CharField(
+#         max_length=50,
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
+#     target_port = forms.CharField(
+#         max_length=10,
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
+#     target_location = forms.CharField(
+#         max_length=50,
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
+#     target_warzone = forms.CharField(
+#         max_length=10,
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
+#     weakness = forms.CharField(
+#         max_length=20,
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
+#     search_time = forms.DateField(widget=DateInput)
+
+#     vpn_ip = forms.CharField(
+#         max_length=20,
+#         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '4'})
+#     )
+#     topic = forms.CharField(
+#         max_length=50,
+#         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '5'})
+#     )
+#     content = forms.CharField(
+#         max_length=1000,
+#         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '5'})
+#     )
+#     # image = forms.ImageField()
+#     follow_up = forms.CharField(
+#         max_length=1000,
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
