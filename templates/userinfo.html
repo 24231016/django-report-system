@@ -1,0 +1,24 @@
+﻿{% extends "base.html" %}
+{% load index %}
+{% block title %}使用者資訊{% endblock %}
+{% block content %}
+{% for message in messages %}
+    <div class='alert alert-warning'>{{ message }}</div>
+{% endfor %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <form action="" method="post"> 
+                {% csrf_token %}
+                <div class="userinfo text-center" >
+                    <h3 >使用者資訊</h3>
+                    <h4 > 級職：<input id="user_rank" type="text" name="user_rank" value="{{ user.rank }}"><br/> </h4>
+                    <h4 > 姓名：<input id="user_name" type="text" name="user_name" value="{{ user.name }}"><br/> </h4>
+                    <h4 > <input onclick="return confirm('確定修改？！！！');" type="submit" value="送出"> </h4>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

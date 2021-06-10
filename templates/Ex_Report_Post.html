@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load index %}
+{% block title %}報告{% endblock %}
+{% block content %}
+<div class="tg-wrap">
+    {% for message in messages %}
+          <div class='alert alert-warning'>{{ message }}</div>
+    {% endfor %}
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table class="tg">
+            <thead >
+                <tr >
+                    <th class="t123" colspan="7" >
+                    執行日期：{{ new_ex_report.excute_date }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tg-rgp7" rowspan="7">偵蒐目標</td>
+                    <td class="tg-rgp7">目標名稱</td>
+                    <td class="tg-rgp7" colspan="5">{{ new_ex_report.target_name }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7" rowspan="3">網址</td>
+                    <td class="tg-rgp7" colspan="2" rowspan="3">{{ new_ex_report.target_url }}</td>
+                    <td class="tg-rgp7">IP</td>
+                    <td class="tg-rgp7" colspan="2">{{ new_ex_report.target_ip }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">服務埠</td>
+                    <td class="tg-rgp7" colspan="2">{{ new_ex_report.target_port }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">所屬戰區</td>
+                    <td class="tg-rgp7" colspan="2">{{ new_ex_report.target_version }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">弱點類型</td>
+                    <td class="tg-rgp7" colspan="5">{{ new_ex_report.weakness }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">來源依據</td>
+                    <td class="tg-rgp7" colspan="5">{{ new_ex_report.source }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">偵蒐類別</td>
+                    <td class="tg-rgp7" colspan="5">{{ new_ex_report.IC_type}}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7" rowspan="2">偵蒐地點</td>
+                    <td class="tg-rgp7">執行地點</td>
+                    <td class="tg-rgp7" colspan="2">{{ new_ex_report.excute_location }}</td>
+                    <td class="tg-rgp7" rowspan="2" colspan="2">偵蒐使用IP位址</td>
+                    <td class="tg-rgp7" rowspan="2" colspan="2">{{ new_ex_report.vpn_ip }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">偵蒐時間</td>
+                    <td class="tg-rgp7" colspan="2">{{ new_ex_report.search_time }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">偵蒐記錄<br/>概況說明</td>
+                    <td class="tg-rgp6" colspan="6">
+                    一、{{ string.0 }}：<br/>
+                    <div id="relate_container" class="relate_container">
+                        {% for relate_len in relate_count %}<br>
+                        <div id="relate_append_no_{{relate_len}}">
+                        {% if change %}
+                        <textarea class="form-control" rows="3" name="relate_content" >{{ relate_content|index:relate_len }}</textarea>
+                        <input id="relate_imageInput_{{relate_len}}" class="form-control image" type="file" accept="image/*" name="relate_image" >
+                        {% if relate_imgs %}
+                        <div id="relatePreview_{{relate_len}}" class="Preview_box">
+                        <a class="DelTag" onclick="DelTag('relatePreview_{{relate_len}}','relate_imageInput_{{relate_len}}');">删除</a>
+                        <img class="img-fluid" src="{{ relate_imgs|index:relate_len }}">
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <textarea readonly class="form-control" rows="3" name="relate_content" >{{ relate_content|index:relate_len }}</textarea>
+                        {% if relate_imgs %}
+                        <img src="{{ relate_imgs|index:relate_len }}" class="img-fluid" alt="Responsive image"></br></br>
+                        {% endif %}
+                        {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if change %}
+                        <div class="card-footer">
+                        <a class="btn btn-secondary btn-sm add_more" id="relate_add_more" name="{{ relate_num }}"><i class="fas fa-plus-circle"></i> 新增</a>
+                        <a class="btn btn-secondary btn-sm remove_more" id="relate_remove_more" name="0" {% if relate_content %}style="display: inline"{% endif %}><i class="fas fa-trash-alt"></i> 刪除</a>
+                        </div>    
+                        {% endif %}
+                    </div>
+                    
+                    二、{{ string.2 }}：<br/>
+                    <div id="summary_container" class="summary_container">
+                        {% for summary_len in summary_count %}<br>
+                        <div id="summary_append_no_{{summary_len}}">
+                        {% if change %}
+                        <textarea class="form-control" rows="3" name="summary_content" >{{ summary_content|index:summary_len }}</textarea>
+                        <input id="summary_imageInput_{{summary_len}}" class="form-control image" type="file" accept="image/*" name="summary_image" >
+                        {% if summary_imgs %}
+                        <div id="summaryPreview_{{summary_len}}" class="Preview_box">
+                        <a class="DelTag" onclick="DelTag('summaryPreview_{{summary_len}}','summary_imageInput_{{summary_len}}');">删除</a>
+                        <img src="{{ summary_imgs|index:summary_len }}">
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <textarea readonly class="form-control" rows="3" name="summary_content" >{{ summary_content|index:summary_len }}</textarea>
+                        {% if summary_imgs %}
+                        <img src="{{ summary_imgs|index:summary_len }}" class="img-fluid" alt=""></br></br>
+                        {% endif %}
+                        {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if change %}
+                        <div class="card-footer">
+                        <a class="btn btn-secondary btn-sm add_more" id="summary_add_more" name="{{ summary_num }}"><i class="fas fa-plus-circle"></i> 新增</a>
+                        <a class="btn btn-secondary btn-sm remove_more" id="summary_remove_more" name="0" {% if summary_content %}style="display: inline"{% endif %}><i class="fas fa-trash-alt"></i> 刪除</a>
+                        </div>    
+                        {% endif %}
+                    </div>
+
+                    三、{{ string.4 }}：<br/>
+                    <div id="exploit_container" class="exploit_container">
+                        {% for exploit_len in exploit_count %}<br>
+                        <div id="exploit_append_no_{{exploit_len}}">
+                        {% if change %}
+                        <textarea class="form-control" rows="3" name="exploit_content" >{{ exploit_content|index:exploit_len }}</textarea>
+                        <input id="exploit_imageInput_{{exploit_len}}" class="form-control image" type="file" accept="image/*" name="exploit_image" >
+                        {% if exploit_imgs %}
+                        <div id="exploitPreview_{{exploit_len}}" class="Preview_box">
+                        <a class="DelTag" onclick="DelTag('exploitPreview_{{exploit_len}}','exploit_imageInput_{{exploit_len}}');">删除</a>
+                        <img src="{{ exploit_imgs|index:exploit_len }}">
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <textarea readonly class="form-control" rows="3" name="exploit_content" >{{ exploit_content|index:exploit_len }}</textarea>
+                        {% if exploit_imgs %}
+                        <img src="{{ exploit_imgs|index:exploit_len }}" class="img-fluid" alt=""></br></br>
+                        {% endif %}
+                        {% endif %}
+                        
+                        </div>
+                        {% endfor %}
+                        {% if change %}
+                        <div class="card-footer">
+                        <a class="btn btn-secondary btn-sm add_more" id="exploit_add_more" name="{{ exploit_num }}"><i class="fas fa-plus-circle"></i> 新增</a>
+                        <a class="btn btn-secondary btn-sm remove_more" id="exploit_remove_more" name="0" {% if exploit_content %}style="display: inline"{% endif %}><i class="fas fa-trash-alt"></i> 刪除</a>
+                        </div>    
+                        {% endif %}
+                    </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">網頁用途</td>
+                    <td class="tg-rgp7" colspan="6">{{ new_ex_report.use }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">瀏覽人數</td>
+                    <td class="tg-rgp7" colspan="6">{{ new_ex_report.people }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">獲取權限</td>
+                    <td class="tg-rgp7" colspan="6">{{ new_ex_report.admin }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">預期成效</td>
+                    <td class="tg-rgp7" colspan="6">{{ new_ex_report.expected }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">後續作為</td>
+                    <td class="tg-rgp7" colspan="6">{{ new_ex_report.follow_up }}</td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7">考核事由</td>
+                    <td class="tg-rgp7" colspan="2"></td>
+                    <td class="tg-rgp7" colspan="2">評分</td>
+                    <td class="tg-rgp7" colspan="2"></td>
+                </tr>
+                <tr>
+                    <td class="tg-rgp7" >偵蒐人員</td>
+                    <td class="tg-rgp7" colspan="2">{{ new_ex_report.user }}</td>
+                    <td class="tg-rgp7" colspan="2">簽證</td>
+                    <td class="tg-rgp7" colspan="2"></td>
+                </tr>
+            </tbody>
+        </table>
+    </br>
+    {% if change %}
+    <input class="btn btn-secondary btn-lg btn-block" type="submit" value="送出" />
+    {% endif %}
+    </form>
+</div>
+
+{% endblock %}
