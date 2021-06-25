@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from mysite import models
-from .forms import RegisterForm,LoginForm,NewExploitReport #,NewInforCollectReport
+from .forms import RegisterForm,LoginForm,NewExploitReport
 import hashlib,ast,os
 from django.db.models import Q
 from docxtpl import DocxTemplate,InlineImage
@@ -13,8 +13,6 @@ from django.utils.http import urlquote
 
 data_list = ['目標關聯',[],'目標簡介說明',[],'目標滲透',[]]
 content_title = ['relate','summary','exploit']
-photos = ['relate_image','summary_image','exploit_image']
-
 
 def index(request):
     if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
@@ -72,7 +70,7 @@ def sign_up(request):
             else:
                 same_username_user = models.User.objects.filter(username=username) #比對資料庫是否有相同用戶名
                 if same_username_user:
-                    messages.add_message(request, messages.WARNING, "該帳號已存在!")
+                    messages.add_message(request, messages.WARNING, "該帳號已存在!，請確認是否已註冊過!")
                     return render(request, 'register.html', locals())
                 same_name_user = models.User.objects.filter(name=name)  #比對資料庫是否有相同信箱
                 if same_name_user:
@@ -130,22 +128,34 @@ def new_exploit_report(request):
                 new_report.expected = new_ex_report.cleaned_data['expected']
                 new_report.follow_up = new_ex_report.cleaned_data['follow_up']
 
-                relate = request.POST.getlist('relate_content')
-                summary = request.POST.getlist('summary_content')
-                exploit = request.POST.getlist('exploit_content')
-                data_list[1] = relate
-                data_list[3] = summary
-                data_list[5] = exploit
+                relate_con = request.POST.getlist('relate_content')
+                summary_con = request.POST.getlist('summary_content')
+                exploit_con = request.POST.getlist('exploit_content')
+                
+                data_list[1] = relate_con
+                data_list[3] = summary_con
+                data_list[5] = exploit_con
                 new_report.content = data_list
                 new_report.save()
-                for photo in photos:
-                    img = request.FILES.getlist(photo)
+                for photos in content_title:
+                    img = []
+                    cnt =  range(len(locals()[ photos + '_con']))
+                    for count in cnt:
+                        tmp = request.FILES.get(photos + '_imageInput_' +str(count))
+                        if tmp is None:
+                            tmp = ""
+                        img.append(tmp)
+                    imgText = request.POST.getlist(photos+'_imgText')
                     x = 0
                     for f in img:
-                        file = models.Images(ex_post = new_report,image=f,content_id=x,content=photo)
+                        try:
+                            text = imgText[x]
+                        except:
+                            text = ""
+                        file = models.Images(ex_post = new_report,image=f,content_id=x,content=(photos+'_image'),description=text)
                         file.save()
                         x+=1
-                    
+
                 return redirect('/Report_List/EX/My_Report')                            
     else:
         return redirect('/login')
@@ -153,86 +163,27 @@ def new_exploit_report(request):
     new_ex_report = NewExploitReport(request.POST)
     return render(request, 'New_Exploit_Report.html', locals())    
 
-# def new_inforcollect_report(request):
-#     if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
-#         username = request.session['username']
-#         user = models.User.objects.get(username = username)
-#         if request.method == "POST":
-#             new_ic_report = NewInforCollectReport(request.POST, request.FILES)
-#             if new_ic_report.is_valid():
-#                 report_user = user.username
-#                 excute_date = new_ic_report.cleaned_data['excute_date']
-#                 target_name = new_ic_report.cleaned_data['target_name']
-#                 target_location = new_ic_report.cleaned_data['target_location']
-#                 target_url = new_ic_report.cleaned_data['target_url']
-#                 target_ip = new_ic_report.cleaned_data['target_ip']
-#                 target_port = new_ic_report.cleaned_data['target_port']
-#                 target_warzone = new_ic_report.cleaned_data['target_warzone']
-#                 weakness = new_ic_report.cleaned_data['weakness']
-#                 search_time = new_ic_report.cleaned_data['search_time']
-#                 vpn_ip = new_ic_report.cleaned_data['vpn_ip']
-#                 content = new_ic_report.cleaned_data['content']
-#                 # image = request.FILES['image']
-#                 follow_up = new_ic_report.cleaned_data['follow_up']
-#                 new_report = models.InforCollectReport(user=report_user,target_location=target_location,excute_date=excute_date,target_name=target_name,target_url =target_url,target_ip=target_ip,target_port=target_port,target_warzone=target_warzone,weakness=weakness,search_time=search_time,vpn_ip=vpn_ip,content=content,follow_up=follow_up,status='待審核')
-#                 new_report.save()
-#                 return redirect('/Report_List/IC/My_Report')
-#     else:
-#         return redirect('/login')
-#     new_ic_report = NewInforCollectReport(request.POST)
-#     return render(request, 'New_InforCollect_Report.html', locals()) 
-
-def report_list(request, judge, slug):
+def report_post(request, slug, id):
     if request.session.get('is_login',None):
-        username = request.session['username']
-        user = models.User.objects.get(username = username)
-        # if judge == "EX":
-        if slug == "ALL":
-            post_list = models.ExploitReport.objects.filter(status = '已審核')
-            validation = False
-        elif slug == "My_Report":
-            post_list = models.ExploitReport.objects.filter(user = username)
-            validation = True
-        elif slug == "Passing_Report":
-            post_list = models.ExploitReport.objects.filter(status = '待審核')
-            validation = False
-        elif slug == "Passed_Report":
-            post_list = models.ExploitReport.objects.filter(status = '已審核')
-            validation = False        
-        # if judge == "IC":
-        #     if slug == "ALL":
-        #         post_list = models.ExploitReport.objects.filter(status = '已審核')
-        #         validation = False
-        #     elif slug == "My_Report":
-        #         post_list = models.InforCollectReport.objects.filter(user = username)
-        #         validation = True
-        #     elif slug == "Passing_Report":
-        #         post_list = models.InforCollectReport.objects.filter(status = '待審核')
-        #         validation = False
-        #     elif slug == "Passed_Report":
-        #         post_list = models.InforCollectReport.objects.filter(status = '已審核')
-        #         validation = False        
-    else:
-        return redirect('/login')
-    return render(request, 'Report_List.html', locals())
-
-def report_post(request, judge, slug, id):
-    if request.session.get('is_login',None):
-        relate_imgs,summary_imgs,exploit_imgs = [],[],[]
-        # if judge == "EX": 
+        relate_imgs,summary_imgs,exploit_imgs,relate_imgText,summary_imgText,exploit_imgText =[],[],[],[],[],[]
         post = models.ExploitReport.objects.get(id = id)
         list123 = post.content
         string = ast.literal_eval(list123)
         relate_content = string[1]
         summary_content = string[3]
         exploit_content = string[5]
+
         for x in content_title:
             locals()[ x + '_num'] = len(locals()[ x + '_content']) -1 
             locals()[ x + '_count'] = range(len(locals()[ x + '_content']))
-            locals()[ x + '_img'] = models.Images.objects.filter(ex_post_id = id,content= (x + '_image'))
-            for i in locals()[ x + '_img']:
-                locals()[ x + '_imgs'].append(i.image.url)
-        
+            try:
+                locals()[ x + '_img'] = models.Images.objects.filter(ex_post_id = id,content= (x + '_image'))
+                for i in locals()[ x + '_img']:
+                    locals()[ x + '_imgs'].append(i.image.url)
+                    locals()[ x + '_imgText'].append(i.description)
+            except:
+                pass
+            locals()[ x + '_length'] = len(locals()[ x + '_imgs']) 
         if slug == "view": 
             change = False
             new_ex_report = models.ExploitReport.objects.get(id = id)     
@@ -262,93 +213,365 @@ def report_post(request, judge, slug, id):
                     new_report.expected = new_ex_report.cleaned_data['expected']
                     new_report.follow_up = new_ex_report.cleaned_data['follow_up']
 
-                    relate = request.POST.getlist('relate_content')
-                    summary = request.POST.getlist('summary_content')
-                    exploit = request.POST.getlist('exploit_content')
-
+                    relate_con = request.POST.getlist('relate_content')
+                    summary_con = request.POST.getlist('summary_content')
+                    exploit_con = request.POST.getlist('exploit_content')
                     
-                    data_list[1] = relate
-                    data_list[3] = summary
-                    data_list[5] = exploit
+                    data_list[1] = relate_con
+                    data_list[3] = summary_con
+                    data_list[5] = exploit_con
                     new_report.content = data_list
                     new_report.save()
-
-                    for photo in photos:
-                        title = photo.split('_')
-                        img = request.FILES.getlist(photo)
+                    
+                    for photos in content_title:  #3個類別做一個for迴圈
+                        img = []
                         x = 0
-                        for f in img:
-                            if f != "":
-                                filedel = models.Images.objects.filter(ex_post_id = id,content= (title[0] + '_image'),content_id = x)
-                                filedel.delete()
-                                fileadd = models.Images(ex_post = new_report,image=f,content_id=x,content=photo)
-                                fileadd.save()
-                                x+=1
-
-                    return redirect('/Report_Post/EX/view/' + str(id))
+                        changecount =  len(locals()[ photos + '_con'])  #更改後的數量
+                        origincount =  len(locals()[ photos + '_content'])  #原資料庫的數量
+                        imgText = request.POST.getlist(photos+'_imgText')  #更改後圖片說明
+                        for count in range(changecount):
+                            tmp = request.FILES.get(photos + '_imageInput_' +str(count))   #取得各類的圖片
+                            if tmp is None:  #如果沒圖片給圖片陣列一個空值
+                                tmp = ""
+                            img.append(tmp)
+                        if changecount == origincount:   #如果內容數量不變，則更新
+                            for f in img:
+                                try:
+                                    fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x) 
+                                    if f != "":                                                               
+                                        try:
+                                            text = imgText[x]
+                                        except:
+                                            text = ""
+                                        fileadd.description=text
+                                        fileadd.image = f
+                                        fileadd.save()                                
+                                    elif imgText[x] !="" :
+                                        if fileadd.image !="":
+                                            fileadd.description=imgText[x]
+                                            fileadd.save()
+                                    x+=1    
+                                except:
+                                    if f != "": 
+                                        try:
+                                            text = imgText[x]
+                                        except:
+                                            text = ""
+                                        file = models.Images(ex_post = new_report,image=f,content_id=x,content=(photos+'_image'),description=text)
+                                        file.save()
+                                    elif imgText[x] !="" :
+                                        if fileadd.image !="":
+                                            fileadd.description=imgText[x]
+                                            fileadd.save()
+                                    x+=1    
+                        elif changecount > origincount:   #如果變更數大於資料庫，則更新後新增   
+                            for f in img:
+                                try:
+                                    fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x)
+                                    if f != "":                                                               
+                                        try:
+                                            text = imgText[x]
+                                        except:
+                                            text = ""
+                                        fileadd.description=text
+                                        fileadd.image = f
+                                        fileadd.save()  
+                                    elif imgText[x] !="" :
+                                        if fileadd.image !="":
+                                            fileadd.description=imgText[x]
+                                            fileadd.save()
+                                    x+=1    
+                                except:
+                                    pass
+                            for i in range(origincount,changecount):
+                                try:
+                                    text = imgText[i]
+                                except:
+                                    text = ""
+                                file = models.Images(ex_post = new_report,image=img[i],content_id=i,content=(photos+'_image'),description=text)
+                                file.save()
+                        elif changecount < origincount:   #如果變更數小於資料庫，則更新後刪除
+                            for f in img:
+                                try:
+                                    fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x) 
+                                    if f != "":                                                               
+                                        try:
+                                            text = imgText[x]
+                                        except:
+                                            text = ""
+                                        fileadd.description=text
+                                        fileadd.image = f
+                                        fileadd.save()                                
+                                    elif imgText[x] !="" :      #
+                                        if fileadd.image !="":
+                                            fileadd.description=imgText[x]
+                                            fileadd.save()
+                                    x+=1    
+                                except:
+                                    pass
+                            for i in range(changecount,origincount):  #改變之後數量少於原本資料庫的都刪除
+                                try:
+                                    models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = i).delete()
+                                except:
+                                    pass
+                        else:
+                            print("我錯了嗎?")  #若是CMD跑出這個 代表我程式寫錯了
+                            
+                    return redirect('/Report_Post/view/' + str(id))
         return render(request, 'Ex_Report_Post.html', locals())
-        # elif judge == "IC":
-        #     if slug == "view":
-        #         new_ic_report = models.InforCollectReport.objects.get(id = id)
-        #         judge = False
-        #     if slug == "modify":
-        #         post = models.InforCollectReport.objects.get(id = id)
-        #         data = {'excute_date': post.excute_date,'target_name': post.target_name,'target_location':post.target_location,'target_url':post.target_url,'target_ip':post.target_ip,'target_port':post.target_port,'target_warzone':post.target_warzone,'weakness':post.weakness,'search_time':post.search_time,'vpn_ip':post.vpn_ip,'content':post.content,'follow_up':post.follow_up}
-        #         new_ic_report = NewInforCollectReport(initial=data)
-        #         if request.method == "POST":
-        #             new_ic_report = NewInforCollectReport(request.POST, request.FILES)
-        #             if new_ic_report.is_valid():
-        #                 report_user = user.username
-        #                 excute_date = new_ic_report.cleaned_data['excute_date']
-        #                 target_name = new_ic_report.cleaned_data['target_name']
-        #                 target_location = new_ic_report.cleaned_data['target_location']
-        #                 target_url = new_ic_report.cleaned_data['target_url']
-        #                 target_ip = new_ic_report.cleaned_data['target_ip']
-        #                 target_port = new_ic_report.cleaned_data['target_port']
-        #                 target_warzone = new_ic_report.cleaned_data['target_warzone']
-        #                 weakness = new_ic_report.cleaned_data['weakness']
-        #                 search_time = new_ic_report.cleaned_data['search_time']
-        #                 vpn_ip = new_ic_report.cleaned_data['vpn_ip']
-        #                 content = new_ic_report.cleaned_data['content']
-        #                 follow_up = new_ic_report.cleaned_data['follow_up']
-        #                 new_report = models.InforCollectReport(user=report_user,target_location=target_location,excute_date=excute_date,target_name=target_name,target_url =target_url,target_ip=target_ip,target_port=target_port,target_warzone=target_warzone,weakness=weakness,search_time=search_time,vpn_ip=vpn_ip,content=content,follow_up=follow_up,status=1)
-        #                 new_report.save()
-            #  return render(request, 'Ic_Report_Post.html', locals())
     else:
         return redirect('/login')
 
+def new_unitedjudge(request):
+    if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
+        exname = []
+        username = request.session['username']
+        user = models.User.objects.get(username = username)    
+        expost = models.ExploitReport.objects.all()
+        if request.method == "POST":
+                new_UnJudge = models.UnitedJudge()
+                user = models.User.objects.get(username = username)
+                new_UnJudge.user = user
+                relate_con = request.POST.getlist('relate_content')
+                summary_con = request.POST.getlist('summary_content')
+                exploit_con = request.POST.getlist('exploit_content')
+                
+                data_list[1] = relate_con
+                data_list[3] = summary_con
+                data_list[5] = exploit_con
+
+                target_name = request.POST.get('target_name')
+                if target_name != "0":
+                    new_UnJudge.target_name = target_name
+
+                new_UnJudge.content = data_list
+                new_UnJudge.save()
+                for photos in content_title:
+                    img = []
+                    cnt =  range(len(locals()[ photos + '_con']))
+                    for count in cnt:
+                        tmp = request.FILES.get(photos + '_imageInput_' +str(count))
+                        if tmp is None:
+                            tmp = ""
+                        img.append(tmp)
+                    imgText = request.POST.getlist(photos+'_imgText')
+                    x = 0
+                    for f in img:
+                        try:
+                            text = imgText[x]
+                        except:
+                            text = ""
+                        file = models.Images(uni_judge = new_UnJudge,image=f,content_id=x,content=(photos+'_image'),description=text)
+                        file.save()
+                        x+=1
+
+                return redirect('/Report_List/UN/My_Report') 
+        return render(request, 'New_UnitedJudge.html', locals())                         
+    else:
+        return redirect('/login')
+      
+
+def unitedjudge_post(request, slug, id):
+    if request.session.get('is_login',None):
+        relate_imgs,summary_imgs,exploit_imgs,relate_imgText,summary_imgText,exploit_imgText =[],[],[],[],[],[]
+        new_UnJudge = models.UnitedJudge.objects.get(id = id)
+        list123 = new_UnJudge.content
+        string = ast.literal_eval(list123)
+        relate_content = string[1]
+        summary_content = string[3]
+        exploit_content = string[5]
+        expost = models.ExploitReport.objects.all()
+
+        for x in content_title:
+            locals()[ x + '_num'] = len(locals()[ x + '_content']) -1 
+            locals()[ x + '_count'] = range(len(locals()[ x + '_content']))
+            try:
+                locals()[ x + '_img'] = models.Images.objects.filter(uni_judge_id = id,content= (x + '_image'))
+                for i in locals()[ x + '_img']:
+                    locals()[ x + '_imgs'].append(i.image.url)
+                    locals()[ x + '_imgText'].append(i.description)
+            except:
+                pass
+            locals()[ x + '_length'] = len(locals()[ x + '_imgs']) 
+        if slug == "view": 
+            change = False
+        if slug == "modify":      
+            change = True                          
+            if request.method == "POST":
+                relate_con = request.POST.getlist('relate_content')
+                summary_con = request.POST.getlist('summary_content')
+                exploit_con = request.POST.getlist('exploit_content')
+                
+                data_list[1] = relate_con
+                data_list[3] = summary_con
+                data_list[5] = exploit_con
+
+                target_name = request.POST.get('target_name')
+                if target_name != "0":
+                    new_UnJudge.target_name = target_name
+                new_UnJudge.content = data_list
+                new_UnJudge.save()
+                
+                for photos in content_title:  #3個類別做一個for迴圈
+                    img = []
+                    x = 0
+                    changecount =  len(locals()[ photos + '_con'])  #更改後的數量
+                    origincount =  len(locals()[ photos + '_content'])  #原資料庫的數量
+                    imgText = request.POST.getlist(photos+'_imgText')  #更改後圖片說明
+                    for count in range(changecount):
+                        tmp = request.FILES.get(photos + '_imageInput_' +str(count))   #取得各類的圖片
+                        if tmp is None:  #如果沒圖片給圖片陣列一個空值
+                            tmp = ""
+                        img.append(tmp)
+                    if changecount == origincount:   #如果內容數量不變，則更新
+                        for f in img:
+                            try:
+                                fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x) 
+                                if f != "":                                                               
+                                    try:
+                                        text = imgText[x]
+                                    except:
+                                        text = ""
+                                    fileadd.description=text
+                                    fileadd.image = f
+                                    fileadd.save()                                
+                                elif imgText[x] !="" :
+                                    if fileadd.image !="":
+                                        fileadd.description=imgText[x]
+                                        fileadd.save()
+                                x+=1    
+                            except:
+                                if f != "": 
+                                    try:
+                                        text = imgText[x]
+                                    except:
+                                        text = ""
+                                    file = models.Images(uni_judge = new_UnJudge,image=f,content_id=x,content=(photos+'_image'),description=text)
+                                    file.save()
+                                elif imgText[x] !="" :
+                                    if fileadd.image !="":
+                                        fileadd.description=imgText[x]
+                                        fileadd.save()
+                                x+=1    
+                    elif changecount > origincount:   #如果變更數大於資料庫，則更新後新增   
+                        for f in img:
+                            try:
+                                fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x)
+                                if f != "":                                                               
+                                    try:
+                                        text = imgText[x]
+                                    except:
+                                        text = ""
+                                    fileadd.description=text
+                                    fileadd.image = f
+                                    fileadd.save()  
+                                elif imgText[x] !="" :
+                                    if fileadd.image !="":
+                                        fileadd.description=imgText[x]
+                                        fileadd.save()
+                                x+=1    
+                            except:
+                                pass
+                        for i in range(origincount,changecount):
+                            try:
+                                text = imgText[i]
+                            except:
+                                text = ""
+                            file = models.Images(uni_judge = new_UnJudge,image=img[i],content_id=i,content=(photos+'_image'),description=text)
+                            file.save()
+                    elif changecount < origincount:   #如果變更數小於資料庫，則更新後刪除
+                        for f in img:
+                            try:
+                                fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x) 
+                                if f != "":                                                               
+                                    try:
+                                        text = imgText[x]
+                                    except:
+                                        text = ""
+                                    fileadd.description=text
+                                    fileadd.image = f
+                                    fileadd.save()                                
+                                elif imgText[x] !="" :      #
+                                    if fileadd.image !="":
+                                        fileadd.description=imgText[x]
+                                        fileadd.save()
+                                x+=1    
+                            except:
+                                pass
+                        for i in range(changecount,origincount):  #改變之後數量少於原本資料庫的都刪除
+                            try:
+                                models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = i).delete()
+                            except:
+                                pass
+                    else:
+                        print("我錯了嗎?")  #若是CMD跑出這個 代表我程式寫錯了
+                        
+                return redirect('/UnitedJudge_Post/view/' + str(id))
+        return render(request, 'UnitedJudge_Post.html', locals())
+    else:
+        return redirect('/login')
+
+def report_list(request, judge, slug):
+    if request.session.get('is_login',None):
+        username = request.session['username']
+        user = models.User.objects.get(username = username)
+        if judge == "EX":
+            if slug == "ALL":
+                post_list = models.ExploitReport.objects.filter(status = '已審核')
+                validation = False
+            elif slug == "My_Report":
+                post_list = models.ExploitReport.objects.filter(user = username)
+                validation = True
+            elif slug == "Passing_Report":
+                post_list = models.ExploitReport.objects.filter(status = '待審核')
+                validation = False
+            elif slug == "Passed_Report":
+                post_list = models.ExploitReport.objects.filter(status = '已審核')
+                validation = False        
+        elif judge == "UN":
+            if slug == "ALL":
+                post_list = models.UnitedJudge.objects.filter(status = '已審核')
+                validation = False
+            elif slug == "My_Report":
+                post_list = models.UnitedJudge.objects.filter(user = username)
+                validation = True
+            elif slug == "Passing_Report":
+                post_list = models.UnitedJudge.objects.filter(status = '待審核')
+                validation = False
+            elif slug == "Passed_Report":
+                post_list = models.UnitedJudge.objects.filter(status = '已審核')
+                validation = False        
+    else:
+        return redirect('/login')
+    return render(request, 'Report_List.html', locals())
+
 def delete_post(request, judge , slug, id):
     if request.session.get('is_login',None):
-        # if judge == "IC":
-        #     models.InforCollectReport.objects.get(id = id).delete()
-        #     url = '/Report_List/' + judge + '/' + slug
-        #     return redirect(url)
-        # elif judge == "EX":
-        models.ExploitReport.objects.get(id = id).delete()
-        url = '/Report_List/' + judge + '/' + slug
+        if judge == "EX":
+            models.ExploitReport.objects.get(id = id).delete()  #根據收到的ID從資料庫中刪除
+        elif judge == "UN": 
+            models.UnitedJudge.objects.get(id = id).delete()  #根據收到的ID從資料庫中刪除
+        url = '/Report_List/' + judge + '/' + slug    
         return redirect(url)
     else:
         return redirect('/login')
 
-def judge_post(request, judge, slug, success, id):
+def judge_post(request, judge, slug, success, id): #審核報告
     if request.session.get('is_login',None):
-        # if judge == "IC":
-        #     if success == "success":
-        #         new_report = models.InforCollectReport.objects.get(id = id)
-        #         new_report.status = '已審核'
-        #     elif  success == "return":
-        #         new_report = models.InforCollectReport.objects.get(id = id)
-        #         new_report.status = '被退回'
-        #     new_report.save()
-        #     url = '/Report_List/' + judge + '/' + slug
-        #     return redirect(url)
-        # elif judge == "EX":
-        if success == "success":
-            new_report = models.ExploitReport.objects.get(id = id)
-            new_report.status = '已審核'
-        elif  success == "return":
-            new_report = models.ExploitReport.objects.get(id = id)
-            new_report.status = '待審核'
+        if judge == "EX":
+            if success == "success":    #審核成功
+                new_report = models.ExploitReport.objects.get(id = id)
+                new_report.status = '已審核'
+            elif  success == "return":  #退回
+                new_report = models.ExploitReport.objects.get(id = id)
+                new_report.status = '待審核'
+        elif judge == "UN": 
+            if success == "success":    #審核成功
+                new_report = models.UnitedJudge.objects.get(id = id)
+                new_report.status = '已審核'
+            elif  success == "return":  #退回
+                new_report = models.UnitedJudge.objects.get(id = id)
+                new_report.status = '待審核'        
         new_report.save()
         url = '/Report_List/' + judge + '/' + slug
         return redirect(url)
@@ -356,43 +579,51 @@ def judge_post(request, judge, slug, success, id):
         return redirect('/login')
 
 def generate_word(request, judge, id):
-    relate_imgs,summary_imgs,exploit_imgs = [],[],[]
-    report = models.ExploitReport.objects.get(id = id)
-    doc = DocxTemplate('media/word_template/成功記錄卡.docx')
-    file_location=u'media/word/%s.成功記錄卡(%s).docx'%(report.id,report.target_name)
-    da1 = report.excute_date.split('-')
-    da2 = report.search_time.split('-')
-    excute_date = '%s年%s月%s日'%(da1[0],da1[1],da1[2])
-    search_time = '%s年%s月%s日'%(da2[0],da2[1],da2[2])
-    list123 = report.content
+    relate_imgs,summary_imgs,exploit_imgs,relate_imgText,summary_imgText,exploit_imgText =[],[],[],[],[],[]
+    if judge == "EX":
+        report = models.ExploitReport.objects.get(id = id)  #依據ID尋找報告
+        doc = DocxTemplate('media/word_template/成功記錄卡.docx')   #模板
+        file_location=u'media/word/成功記錄卡(%s).docx'%report.target_name   #輸出檔案
+        da1 = report.excute_date.split('-') #處理日期格式
+        da2 = report.search_time.split('-')
+        excute_date = '%d年%s月%s日'%(int(da1[0])-1911,da1[1],da1[2])  #西元轉換民國
+        search_time = '%d%s%s'%(int(da2[0])-1911,da2[1],da2[2])
+    elif judge == "UN":
+        report = models.UnitedJudge.objects.get(id = id)
+        doc = DocxTemplate('media/word_template/聯審資料.docx')   #模板
+        file_location=u'media/word/聯審資料(%s).docx'%report.target_name   #輸出檔案
+    list123 = report.content    #處理資料格式 轉換LIST
     string = ast.literal_eval(list123)
-    relate_content = list(filter(None, string[1]))
-    summary_content = list(filter(None, string[3]))
-    exploit_content = list(filter(None, string[5]))
-    img = 1
-    for x in content_title:
-        locals()[ x + '_num'] = len(locals()[ x + '_content']) -1 
-        locals()[ x + '_count'] = range(len(locals()[ x + '_content']))
-        locals()[ x + '_img'] = models.Images.objects.filter(ex_post_id = id,content= (x + '_image'))
-        for i in locals()[ x + '_img']:
-            imgdata = InlineImage(doc,i.image.url.lstrip('/'), width=Mm(130), height=Mm(75))
-            locals()[ x + '_imgs'].append(imgdata)
+    relate_content = string[1]
+    summary_content = string[3]
+    exploit_content = string[5]
     
-    da1 = report.excute_date.split('-')
-    da2 = report.search_time.split('-')
-    excute_date = '%s年%s月%s日'%(da1[0],da1[1],da1[2])
-    search_time = '%s年%s月%s日'%(da2[0],da2[1],da2[2])
-    
-    doc.render(locals())       
-    doc.save(file_location)
-    if os.path.exists(file_location):
+    for x in content_title: #處理資料
+        locals()[ x + '_count'] = range(len(locals()[ x + '_content'])) #創造for迴圈需要的range
+        try:
+            if judge == "EX":
+                locals()[ x + '_img'] = models.Images.objects.filter(ex_post_id = id,content= (x + '_image'))   #將報告圖片出來
+            elif judge == "UN":
+                locals()[ x + '_img'] = models.Images.objects.filter(uni_judge_id = id,content= (x + '_image'))   #將報告圖片出來
+            for i in locals()[ x + '_img']:
+                imgdata = InlineImage(doc,i.image.url.lstrip('/'), width=Mm(130), height=Mm(75))    #處理成doxctpl可讀取圖片格式
+                locals()[ x + '_imgs'].append(imgdata)
+                locals()[ x + '_imgText'].append(i.description)
+        except:
+            pass
+        
+    doc.render(locals())    #渲染至word
+    doc.save(file_location) #存檔
+
+    if os.path.exists(file_location): #檔案下載
         with open(file_location, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
             response['Content-Disposition'] = 'inline; filename={0}'.format(urlquote(os.path.basename(file_location)))
             return response
     raise Http404
-    url = '/Report_List/' + judge + '/My_Report'
-    return redirect(url)
+
+    url = '/Report_List/' + judge + '/My_Report' 
+    return redirect(url) #返回我的報告
 
 def log_out(request):
     request.session.flush() #一次性將session內容全部清除

@@ -17,7 +17,11 @@
         <tbody>
             {% for post in post_list %}
                 <tr>
-                    <td><a href="/Report_Post/{{judge}}/view/{{post.id}}" class="text-info">{{ post.target_name }}</a></td>
+                    {% if judge == "EX" %}
+                        <td><a href="/Report_Post/view/{{post.id}}" class="text-info">{{ post.target_name }}</a></td>
+                    {% else %}
+                        <td><a href="/UnitedJudge_Post/view/{{post.id}}" class="text-info">{{ post.target_name }}</a></td>
+                    {% endif %}
                     <td>{{ post.user }}</td>
                     <td>{{ post.upload_date }}</td>
                     <td>{{ post.status }}</td>
@@ -25,7 +29,11 @@
                     {% if validation or user.enabled %}
                     <td>
                         {% if validation %}
-                            <a href="/Report_Post/{{judge}}/modify/{{post.id}}" class="btn btn-info">修改</a>
+                            {% if judge == "EX" %}
+                                <a href="/Report_Post/modify/{{post.id}}" class="btn btn-info">修改</a>
+                            {% else %}
+                                <a href="/UnitedJudge_Post/modify/{{post.id}}" class="btn btn-info">修改</a>
+                            {% endif %}
                             <a href="/Delete_Post/{{judge}}/{{slug}}/{{post.id}}" onclick="return confirm('確定刪除？！！！');" class="btn btn-danger">刪除</a>
                         {% endif %}
                     
