@@ -40,6 +40,7 @@
                         {% if user.enabled %}
                             {% if post.status == "待審核" %}
                                 <a href="/Judge_Post/{{judge}}/{{slug}}/success/{{post.id}}" onclick="return confirm('確定審核？！！！');" class="btn btn-success">審核</a>
+                                <a href="/WORD/{{judge}}/{{post.id}}" class="btn btn-outline-primary">WORD</a>
                             {% endif %}
                             {% if post.status == "已審核" %}
                                 <a href="/Judge_Post/{{judge}}/{{slug}}/return/{{post.id}}" onclick="return confirm('確定退回？！！！');" class="btn btn-dark">退回</a>

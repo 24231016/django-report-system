@@ -18,18 +18,27 @@ def index(request):
     if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
         username = request.session['username']
         user = models.User.objects.get(username = username)
+        
+    else:
+        return redirect('/login')
+    return render(request, 'index.html',locals())
+
+def search(request):
+    if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
+        username = request.session['username']
+        user = models.User.objects.get(username = username)
         search_post = request.GET.get('search')
         if search_post:
             search = models.ExploitReport.objects.filter(Q(target_name__icontains=search_post) | Q(target_url__icontains=search_post) | Q(target_ip__icontains=search_post) | Q(content__icontains=search_post))
-            title = "%s的搜尋結果，共%s筆"%(search_post,len(search))
-
+            search1 = models.UnitedJudge.objects.filter(Q(target_name__icontains=search_post) | Q(content__icontains=search_post))
+            title = "%s的搜尋結果，共%s筆"%(search_post,len(search)+len(search1))
         else:
             # messages.add_message(request, messages.WARNING, '找不到啦')
             title = "%s的搜尋結果，共0筆"
     else:
         return redirect('/login')
-    return render(request, 'index.html',locals())
-
+    return render(request, 'search.html',locals())
+    
 
 def sign_in(request):
     if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
@@ -46,7 +55,7 @@ def sign_in(request):
                     request.session['username'] = user.username
                     request.session['name'] = user.name
                     request.session['rank'] = user.rank
-                    url = '/Report_List/EX/ALL'
+                    url = ''
                     return redirect(url)
                 else:
                     messages.add_message(request, messages.WARNING, '密碼錯誤')
@@ -179,8 +188,14 @@ def report_post(request, slug, id):
             try:
                 locals()[ x + '_img'] = models.Images.objects.filter(ex_post_id = id,content= (x + '_image'))
                 for i in locals()[ x + '_img']:
-                    locals()[ x + '_imgs'].append(i.image.url)
-                    locals()[ x + '_imgText'].append(i.description)
+                    
+                    if i.image:
+                        print(i.image)
+                        locals()[ x + '_imgs'].append(i.image.url)
+                        locals()[ x + '_imgText'].append(i.description)
+                    else:
+                        locals()[ x + '_imgs'].append('')
+                        locals()[ x + '_imgText'].append('')
             except:
                 pass
             locals()[ x + '_length'] = len(locals()[ x + '_imgs']) 
@@ -237,83 +252,30 @@ def report_post(request, slug, id):
                         if changecount == origincount:   #如果內容數量不變，則更新
                             for f in img:
                                 try:
-                                    fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x) 
-                                    if f != "":                                                               
-                                        try:
-                                            text = imgText[x]
-                                        except:
-                                            text = ""
-                                        fileadd.description=text
-                                        fileadd.image = f
-                                        fileadd.save()                                
-                                    elif imgText[x] !="" :
-                                        if fileadd.image !="":
-                                            fileadd.description=imgText[x]
-                                            fileadd.save()
-                                    x+=1    
+                                    text = imgText[x]
                                 except:
-                                    if f != "": 
-                                        try:
-                                            text = imgText[x]
-                                        except:
-                                            text = ""
-                                        file = models.Images(ex_post = new_report,image=f,content_id=x,content=(photos+'_image'),description=text)
-                                        file.save()
-                                    elif imgText[x] !="" :
-                                        if fileadd.image !="":
-                                            fileadd.description=imgText[x]
-                                            fileadd.save()
-                                    x+=1    
+                                    text = ""
+                                update_post(f,text,x,id,photos,new_report)
+                                x+=1    
                         elif changecount > origincount:   #如果變更數大於資料庫，則更新後新增   
                             for f in img:
                                 try:
-                                    fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x)
-                                    if f != "":                                                               
-                                        try:
-                                            text = imgText[x]
-                                        except:
-                                            text = ""
-                                        fileadd.description=text
-                                        fileadd.image = f
-                                        fileadd.save()  
-                                    elif imgText[x] !="" :
-                                        if fileadd.image !="":
-                                            fileadd.description=imgText[x]
-                                            fileadd.save()
-                                    x+=1    
-                                except:
-                                    pass
-                            for i in range(origincount,changecount):
-                                try:
-                                    text = imgText[i]
+                                    text = imgText[x]
                                 except:
                                     text = ""
-                                file = models.Images(ex_post = new_report,image=img[i],content_id=i,content=(photos+'_image'),description=text)
-                                file.save()
+                                update_post(f,text,x,id,photos,new_report)
+                                x+=1    
                         elif changecount < origincount:   #如果變更數小於資料庫，則更新後刪除
                             for f in img:
                                 try:
-                                    fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x) 
-                                    if f != "":                                                               
-                                        try:
-                                            text = imgText[x]
-                                        except:
-                                            text = ""
-                                        fileadd.description=text
-                                        fileadd.image = f
-                                        fileadd.save()                                
-                                    elif imgText[x] !="" :      #
-                                        if fileadd.image !="":
-                                            fileadd.description=imgText[x]
-                                            fileadd.save()
-                                    x+=1    
+                                    text = imgText[x]
                                 except:
-                                    pass
-                            for i in range(changecount,origincount):  #改變之後數量少於原本資料庫的都刪除
-                                try:
-                                    models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = i).delete()
-                                except:
-                                    pass
+                                    text = ""
+                                update_post(f,text,x,id,photos,new_report)
+                                x+=1    
+                            for i in range(changecount,origincount):
+                                filedel = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = i) 
+                                filedel.delete()
                         else:
                             print("我錯了嗎?")  #若是CMD跑出這個 代表我程式寫錯了
                             
@@ -324,14 +286,12 @@ def report_post(request, slug, id):
 
 def new_unitedjudge(request):
     if request.session.get('is_login',None): #檢查session確定是否登入，不允許重複登入
-        exname = []
         username = request.session['username']
         user = models.User.objects.get(username = username)    
         expost = models.ExploitReport.objects.all()
         if request.method == "POST":
                 new_UnJudge = models.UnitedJudge()
-                user = models.User.objects.get(username = username)
-                new_UnJudge.user = user
+                new_UnJudge.user = user.username
                 relate_con = request.POST.getlist('relate_content')
                 summary_con = request.POST.getlist('summary_content')
                 exploit_con = request.POST.getlist('exploit_content')
@@ -388,8 +348,12 @@ def unitedjudge_post(request, slug, id):
             try:
                 locals()[ x + '_img'] = models.Images.objects.filter(uni_judge_id = id,content= (x + '_image'))
                 for i in locals()[ x + '_img']:
-                    locals()[ x + '_imgs'].append(i.image.url)
-                    locals()[ x + '_imgText'].append(i.description)
+                    if i.image.url:
+                        locals()[ x + '_imgs'].append(i.image.url)
+                        locals()[ x + '_imgText'].append(i.description)
+                    else:
+                        locals()[ x + '_imgs'].append('')
+                        locals()[ x + '_imgText'].append('')
             except:
                 pass
             locals()[ x + '_length'] = len(locals()[ x + '_imgs']) 
@@ -426,83 +390,30 @@ def unitedjudge_post(request, slug, id):
                     if changecount == origincount:   #如果內容數量不變，則更新
                         for f in img:
                             try:
-                                fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x) 
-                                if f != "":                                                               
-                                    try:
-                                        text = imgText[x]
-                                    except:
-                                        text = ""
-                                    fileadd.description=text
-                                    fileadd.image = f
-                                    fileadd.save()                                
-                                elif imgText[x] !="" :
-                                    if fileadd.image !="":
-                                        fileadd.description=imgText[x]
-                                        fileadd.save()
-                                x+=1    
+                                text = imgText[x]
                             except:
-                                if f != "": 
-                                    try:
-                                        text = imgText[x]
-                                    except:
-                                        text = ""
-                                    file = models.Images(uni_judge = new_UnJudge,image=f,content_id=x,content=(photos+'_image'),description=text)
-                                    file.save()
-                                elif imgText[x] !="" :
-                                    if fileadd.image !="":
-                                        fileadd.description=imgText[x]
-                                        fileadd.save()
-                                x+=1    
+                                text = ""
+                            update_unjudge(f,text,x,id,photos,new_UnJudge)
+                            x+=1  
                     elif changecount > origincount:   #如果變更數大於資料庫，則更新後新增   
                         for f in img:
                             try:
-                                fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x)
-                                if f != "":                                                               
-                                    try:
-                                        text = imgText[x]
-                                    except:
-                                        text = ""
-                                    fileadd.description=text
-                                    fileadd.image = f
-                                    fileadd.save()  
-                                elif imgText[x] !="" :
-                                    if fileadd.image !="":
-                                        fileadd.description=imgText[x]
-                                        fileadd.save()
-                                x+=1    
-                            except:
-                                pass
-                        for i in range(origincount,changecount):
-                            try:
-                                text = imgText[i]
+                                text = imgText[x]
                             except:
                                 text = ""
-                            file = models.Images(uni_judge = new_UnJudge,image=img[i],content_id=i,content=(photos+'_image'),description=text)
-                            file.save()
+                            update_unjudge(f,text,x,id,photos,new_UnJudge)
+                            x+=1  
                     elif changecount < origincount:   #如果變更數小於資料庫，則更新後刪除
                         for f in img:
                             try:
-                                fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x) 
-                                if f != "":                                                               
-                                    try:
-                                        text = imgText[x]
-                                    except:
-                                        text = ""
-                                    fileadd.description=text
-                                    fileadd.image = f
-                                    fileadd.save()                                
-                                elif imgText[x] !="" :      #
-                                    if fileadd.image !="":
-                                        fileadd.description=imgText[x]
-                                        fileadd.save()
-                                x+=1    
+                                text = imgText[x]
                             except:
-                                pass
-                        for i in range(changecount,origincount):  #改變之後數量少於原本資料庫的都刪除
-                            try:
-                                models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = i).delete()
-                            except:
-                                pass
+                                text = ""
+                            update_unjudge(f,text,x,id,photos,new_UnJudge)
+                            x+=1  
+                        for i in range(changecount,origincount):
+                            filedel = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = i) 
+                            filedel.delete()
                     else:
                         print("我錯了嗎?")  #若是CMD跑出這個 代表我程式寫錯了
                         
@@ -608,8 +519,13 @@ def generate_word(request, judge, id):
             for i in locals()[ x + '_img']:
                 imgdata = InlineImage(doc,i.image.url.lstrip('/'), width=Mm(130), height=Mm(75))    #處理成doxctpl可讀取圖片格式
                 locals()[ x + '_imgs'].append(imgdata)
+                if locals()[ x + '_imgs']:
+                    locals()[ x + '_imgcount'] = len(locals()[ x + '_imgs']) #創造for迴圈需要的range
+                else:
+                    locals()[ x + '_imgcount'] = 0                
                 locals()[ x + '_imgText'].append(i.description)
         except:
+            locals()[ x + '_imgcount'] = 0
             pass
         
     doc.render(locals())    #渲染至word
@@ -629,3 +545,46 @@ def log_out(request):
     request.session.flush() #一次性將session內容全部清除
     return redirect('/login') 
 
+def update_post(f,text,x,id,photos,new_report):    
+    try:
+        fileadd = models.Images.objects.get(ex_post_id = id,content= (photos + '_image'),content_id = x) 
+        if f != "":                                                             
+            fileadd.description=text
+            fileadd.image = f
+            fileadd.save()                                
+        elif text !="" :
+            fileadd.description=text
+            fileadd.save()
+        else:
+            fileadd.description=''
+            fileadd.image = ''
+            fileadd.save()   
+    except:
+        if f != "": 
+            file = models.Images(ex_post = new_report,image=f,content_id=x,content=(photos+'_image'),description=text)
+            file.save()
+        else:
+            file = models.Images(ex_post = new_report,image='',content_id=x,content=(photos+'_image'),description='')
+            file.save()
+
+def update_unjudge(f,text,x,id,photos,new_UnJudge):
+    try:
+        fileadd = models.Images.objects.get(uni_judge_id = id,content= (photos + '_image'),content_id = x) 
+        if f != "":          
+            fileadd.description=text
+            fileadd.image = f
+            fileadd.save()                                
+        elif text !="" :
+            fileadd.description=text
+            fileadd.save()
+        else:
+            fileadd.description=''
+            fileadd.image = ''
+            fileadd.save()   
+    except:
+        if f != "": 
+            file = models.Images(uni_judge = new_UnJudge,image=f,content_id=x,content=(photos+'_image'),description=text)
+            file.save()
+        else:
+            file = models.Images(uni_judge = new_UnJudge,image='',content_id=x,content=(photos+'_image'),description='')
+            file.save()

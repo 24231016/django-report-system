@@ -65,22 +65,25 @@
                     一、{{ string.0 }}：<br/>
 
                     <div id="relate_container" class="relate_container">
-                        {% for relate_len in relate_count %}{{ relate_len|add:1  }}.<br>
+                        {% for relate_len in relate_count %}
                         <div id="relate_append_no_{{relate_len}}" style="text-align:center" class="relate_append_no">
+                            <h5 align="left">{{ relate_len|add:1  }}.</h5>
                             {% if change %}  
                             <textarea class="form-control" rows="3" name="relate_content" >{{ relate_content|index:relate_len }}</textarea>
-                            <input id="relate_imageInput_{{relate_len}}" class="form-control image" type="file"accept="image/*" name="relate_imageInput_{{relate_len}}" >     
-                            {% if relate_imgs %}
-                            <textarea id="relate_imageText_{{relate_len}}" class="textcenter" row="1" placeholder="圖片說明" name="relate_imgText">{% if relate_imgText %}{{ relate_imgText|index:relate_len }}{% endif %}</textarea>
-                            <div id="relatePreview_{{relate_len}}" class="Preview_box">
-                                <a class="DelTag" onclick="DelTag('relatePreview_{{relate_len}}','relate_imageInput_{{relate_len}}');">删除</a>
-                                <img class="img-fluid" src="{{ relate_imgs|index:relate_len }}">
+                            <input id="relate_imageInput_{{relate_len}}" class="form-control image" type="file"accept="image/*" name="relate_imageInput_{{relate_len}}" >                                 
+                            {% if relate_imgs|index:relate_len %}                                                        
+                            <div id="relatePreview_{{relate_len}}">
+                                <div style="text-align:center" class="Preview_box">
+                                    <a class="DelTag" onclick="DelTag('relatePreview_{{relate_len}}','relate_imageInput_{{relate_len}}','relate_imageText_{{relate_len}}');">删除</a>
+                                    <img class="img-fluid" src="{{ relate_imgs|index:relate_len }}">
+                                </div>
+                                <textarea id="relate_imageText_{{relate_len}}" class="textcenter" row="1" required placeholder="圖片說明" name="relate_imgText">{% if relate_imgText %}{{ relate_imgText|index:relate_len }}{% endif %}</textarea>
+                                圖{{ relate_len|add:1  }}</br>
                             </div>
-                            圖{{ relate_len|add:1  }}</br>
                             {% endif %}
                             {% else %}
                             <textarea readonly class="form-control" rows="3" name="relate_content" >{{ relate_content|index:relate_len }}</textarea>
-                            {% if relate_imgs %}
+                            {% if relate_imgs|index:relate_len %}
                             <img src="{{ relate_imgs|index:relate_len }}" class="img-fluid" alt="Responsive image"></br>
                             圖{{ relate_len|add:1  }}  {{ relate_imgText|index:relate_len }}</br>
                             {% endif %}
@@ -97,22 +100,25 @@
                     
                     二、{{ string.2 }}：<br/>
                     <div id="summary_container" class="summary_container">
-                        {% for summary_len in summary_count %}{{ summary_len|add:1 }}.<br>
+                        {% for summary_len in summary_count %}
                         <div id="summary_append_no_{{summary_len}}" style="text-align:center" class="summary_append_no">
+                            <h5 align="left">{{ summary_len|add:1 }}.</h5>
                             {% if change %}
                             <textarea class="form-control" rows="3" name="summary_content" >{{ summary_content|index:summary_len }}</textarea>
                             <input id="summary_imageInput_{{summary_len}}" class="form-control image" type="file" accept="image/*" name="summary_imageInput_{{summary_len}}" >
-                            {% if summary_imgs %}
-                            <textarea id="summary_imageText_{{summary_len}}" class="textcenter" row="1" placeholder="圖片說明" name="summary_imgText">{% if summary_imgText %}{{ summary_imgText|index:summary_len }}{% endif %}</textarea>
-                            <div id="summaryPreview_{{summary_len}}" class="Preview_box">
-                                <a class="DelTag" onclick="DelTag('summaryPreview_{{summary_len}}','summary_imageInput_{{summary_len}}');">删除</a>
-                                <img src="{{ summary_imgs|index:summary_len }}">
-                            </div>
-                            圖{{ summary_len|add:relate_length|add:1  }}</br>   
+                            {% if summary_imgs|index:summary_len %}                            
+                            <div id="summaryPreview_{{summary_len}}">
+                                <div style="text-align:center" class="Preview_box">
+                                    <a class="DelTag" onclick="DelTag('summaryPreview_{{summary_len}}','summary_imageInput_{{summary_len}}');">删除</a>
+                                    <img src="{{ summary_imgs|index:summary_len }}">
+                                </div>                                
+                                <textarea id="summary_imageText_{{summary_len}}" class="textcenter" row="1" required placeholder="圖片說明" name="summary_imgText">{% if summary_imgText %}{{ summary_imgText|index:summary_len }}{% endif %}</textarea>
+                                圖{{ summary_len|add:relate_length|add:1  }}</br>
+                            </div>   
                             {% endif %}
                             {% else %}
                             <textarea readonly class="form-control" rows="3" name="summary_content" >{{ summary_content|index:summary_len }}</textarea>
-                            {% if summary_imgs %}
+                            {% if summary_imgs|index:summary_len %}
                             <img src="{{ summary_imgs|index:summary_len }}" class="img-fluid" alt=""></br>
                             圖{{ summary_len|add:relate_length|add:1  }}  {{ summary_imgText|index:summary_len }}</br>                        
                             {% endif %}
@@ -129,22 +135,26 @@
 
                     三、{{ string.4 }}：<br/>
                     <div id="exploit_container" class="exploit_container">
-                        {% for exploit_len in exploit_count %}{{ exploit_len|add:1 }}.<br>
+                        {% for exploit_len in exploit_count %}
                         <div id="exploit_append_no_{{exploit_len}}" style="text-align:center" class="exploit_append_no">
+
+                            <h5 align="left">{{ exploit_len|add:1 }}.</h5>
                             {% if change %}
                             <textarea class="form-control" rows="3" name="exploit_content" >{{ exploit_content|index:exploit_len }}</textarea>
                             <input id="exploit_imageInput_{{exploit_len}}" class="form-control image" type="file" accept="image/*" name="exploit_imageInput_{{exploit_len}}" >
-                            {% if exploit_imgs %}
-                            <textarea id="exploit_imageText_{{exploit_len}}" class="textcenter" row="1" placeholder="圖片說明" name="exploit_imgText">{% if exploit_imgText %}{{ exploit_imgText|index:exploit_len }}{% endif %}</textarea>
-                            <div id="exploitPreview_{{exploit_len}}" class="Preview_box">
-                                <a class="DelTag" onclick="DelTag('exploitPreview_{{exploit_len}}','exploit_imageInput_{{exploit_len}}');">删除</a>
-                                <img src="{{ exploit_imgs|index:exploit_len }}">                        
+                            {% if exploit_imgs|index:exploit_len %}
+                            <div id="exploitPreview_{{exploit_len}}">
+                                <div style="text-align:center" class="Preview_box">
+                                    <a class="DelTag" onclick="DelTag('exploitPreview_{{exploit_len}}','exploit_imageInput_{{exploit_len}}');">删除</a>
+                                    <img src="{{ exploit_imgs|index:exploit_len }}">
+                                </div>                                
+                                <textarea id="exploit_imageText_{{exploit_len}}" class="textcenter" row="1" required placeholder="圖片說明" name="exploit_imgText">{% if exploit_imgText %}{{ exploit_imgText|index:exploit_len }}{% endif %}</textarea>      
+                                圖{{ exploit_len|add:summary_length|add:relate_length|add:1  }}</br>              
                             </div>
-                            圖{{ exploit_len|add:summary_length|add:relate_length|add:1  }}</br>
                             {% endif %}
                             {% else %}
                             <textarea readonly class="form-control" rows="3" name="exploit_content" >{{ exploit_content|index:exploit_len }}</textarea>
-                            {% if exploit_imgs %}
+                            {% if exploit_imgs|index:exploit_len %}
                             <img src="{{ exploit_imgs|index:exploit_len }}" class="img-fluid" alt=""></br>
                             圖{{ exploit_len|add:summary_length|add:relate_length|add:1  }}  {{ exploit_imgText|index:exploit_len }}</br>
                             {% endif %}

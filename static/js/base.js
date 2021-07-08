@@ -1,5 +1,6 @@
-function DelTag(val,asd){
+function DelTag(val,asd,text){
     $("#"+asd).val('');
+    $("#"+text).val(' ');
     $("#"+val).remove();
 }
 
@@ -26,12 +27,16 @@ $(document).ready(function(){
         DelTag(item+"Preview_"+z+','+item+"_imageInput_"+z);
         let file = this.files[0];
         let PicSrc = URL.createObjectURL(file);
-        Pic_str = '<div id="'+item+'Preview_'+z+'" style="text-align:center" class="Preview_box">';
+        Pic_str = '<div id="'+item+'Preview_'+z+'" style="text-align:center">';
+        Pic_str +='<div class="Preview_box">';
         Pic_str +='<a class="DelTag" onclick="DelTag('+"'"+item+"Preview_"+z+"'"+','+"'"+item+"_imageInput_"+z+"'"+');">删除</a>';
         Pic_str +='<img src="'+PicSrc+'"/>';
-        Pic_str +='圖'+x+''
+        Pic_str +='</div>';
+        Pic_str +='<textarea id="'+item+'_imageText_'+z+'" rows="1" class="textcenter" required placeholder="圖片說明" name="'+item+'_imgText"></textarea>';
+        Pic_str +='圖'+x+'';
         Pic_str +='</div>';
         $('#'+item+'_append_no_'+z).append(Pic_str);
+
         
     });
     var list=['relate','summary','exploit']
@@ -44,7 +49,6 @@ $(document).ready(function(){
                 '<br>'+(x+1)+'.'+
                 '<textarea class="form-control" rows="3" placeholder="如有多張圖片請略過內容直接新增欄位選擇圖片" name="'+item+'_content"></textarea>'+
                 '<input id="'+item+'_imageInput_'+x+'" class="form-control imageInput" type="file" accept="image/*" name="'+item+'_imageInput_'+x+'" >'+
-                '<textarea id="'+item+'_imageText_'+x+'" rows="1" class="textcenter" placeholder="圖片說明" name="'+item+'_imgText">'
                 '</div>';
             $(html).insertAfter('#'+item+'_append_no_'+y);
             $(this).attr('name',x);
